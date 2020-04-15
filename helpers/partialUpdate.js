@@ -50,6 +50,7 @@ function sqlForPartialUpdate(table, items, key, id) {
   values.push(id);
 
   // only creates query, doesn't send it
+  // we should use this in the models?
   return { query, values };
 }
 
