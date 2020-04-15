@@ -83,6 +83,10 @@ router.patch("/:handle", async function (req, res, next) {
     let key = "handle";
     let id = handle;
 
+    if (handle in items){
+      throw new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
+    }
+
     console.log("\n\n\n\n handle is ", handle);
     console.log("\n\n\n\n request.body is ", req.body);
     console.log("\n\n\n\n request.params is ", req.params);
