@@ -41,7 +41,7 @@ function sqlForPartialUpdate(table, items, key, id) {
   let colNames = columnNames.join(", ");  // added
 
   // cols looks like "username=$1, handle=$2, id=$3, phone=$3"
-  let query = `UPDATE ${table} SET ${cols} WHERE ${key}=$${idx} RETURNING ${colNames}`; // changed from * to ${columnNames}, wanted to return JUST what was changed, not everything for security concerns
+  let query = `\`UPDATE ${table} SET ${cols} WHERE ${key}=$${idx} RETURNING ${colNames}\`,`; // changed from * to ${columnNames}, wanted to return JUST what was changed, not everything for security concerns
 
   let values = Object.values(items);
   values.push(id);
