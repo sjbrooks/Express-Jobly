@@ -40,17 +40,14 @@ describe("partialUpdate()", () => {
       expect(query).toEqual("UPDATE companies SET name=$1, num_employees=$2 WHERE handle=$3 RETURNING name, num_employees, handle");
       expect(values).toEqual([ 'Larry Inc', 876543, 'FicInc' ]);
       
-      //attempted to test for if update happened
-      // why doesn't testRes run/update?
-      // SQL for the updated company
-      // let testRes = await db.query(query, values);
+      // saved for intergration testing
+      let testRes = await db.query(query, values);
       // console.log(testRes);
 
-      // expect(testRes.rows[0].name).toBe("Larry Inc");
-      // expect(testRes.rows[0].num_employees).toBe(876543);
-      // expect(testRes.rows[0].handle).toBe('FicInc');
+      expect(testRes.rows[0].name).toBe("Larry Inc");
+      expect(testRes.rows[0].num_employees).toBe(876543);
+      expect(testRes.rows[0].handle).toBe('FicInc');
 
-      // WHY NOT? add test using getCompany() to see if company is updated
     });
 
 });
