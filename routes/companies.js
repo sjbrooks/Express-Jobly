@@ -44,8 +44,7 @@ router.post("/", async function (req, res, next) {
   try {
     let { handle, name, num_employees, description, logo_url } = req.body;
     const company = await Company.create({ handle, name, num_employees, description, logo_url });
-    return res.json({ company });
-
+    return res.status(201).json({company});
   } catch (err) {
     return next (err);
   }
@@ -97,8 +96,9 @@ router.patch("/:handle", async function (req, res, next) {
   let key = "handle";
   let id = handle;
 
-  if (handle in items) {
-    throw new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
+  if ("handle" in items) {
+    let error = new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
+    return next(error);
   }
 
   try {
