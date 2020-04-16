@@ -62,9 +62,9 @@ router.get("/:handle", async function (req, res, next) {
   try {
     let { handle } = req.params;
     const company = await Company.getByHandle({ handle });
-
+  
     if (!company) throw new ExpressError("No company found", NOT_FOUND);
-
+    
     return res.json({ company })
 
   } catch (err) {

@@ -68,8 +68,6 @@ describe("Tests for companies routes", function () {
     it("Get no comapny when non-existing handle is passed in", async function () {
       const resp = await request(app).get(`/companies/NotFoundCo`);
 
-      // QUESTION how do we easily determine which error status code vs expressError code?
-      // expressError turns up in resp.body, not resp.statusCode
       expect(resp.statusCode).toBe(404);
       expect(resp.body).toEqual({
         "status": 404,
@@ -208,14 +206,7 @@ describe("Tests for companies routes", function () {
     });
   });
 
-
-
-
-
 });
-
-
-
 
 
 
