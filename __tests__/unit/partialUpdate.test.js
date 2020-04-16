@@ -1,8 +1,7 @@
-const db = require("../../db");
-const sqlForPartialUpdate = require("../../helpers/partialUpdate");
-
 process.env.NODE_ENV = "test";
 
+const db = require("../../db");
+const sqlForPartialUpdate = require("../../helpers/partialUpdate");
 
 let CompHandleT1;
 describe("partialUpdate()", () => {

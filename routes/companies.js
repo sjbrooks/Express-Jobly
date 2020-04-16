@@ -2,7 +2,10 @@ const express = require("express");
 const router = new express.Router();
 const ExpressError = require("../helpers/expressError");
 const Company = require("../models/company");
-const { NOT_FOUND, BAD_REQUEST, UNAUTHORIZED } = require("../httpStatusCodes")
+const { NOT_FOUND, BAD_REQUEST, UNAUTHORIZED } = require("../httpStatusCodes");
+const jsonschema = require("jsonschema");
+const companyCreateSchema = require("../schemas/companycreate.json");
+const companyPatchSchema = require("../schemas/company-patch.json");
 
 
 /**  GET /companies {search, min_employees, max_employees}  
@@ -11,9 +14,6 @@ const { NOT_FOUND, BAD_REQUEST, UNAUTHORIZED } = require("../httpStatusCodes")
 router.get("/", async function (req, res, next) {
   try {
     let { search, min_employees, max_employees } = req.query;
-
-    // console.log("\n\n\n\n request.body is ", req.body);
-
     const companies = await Company.get({ search, min_employees, max_employees });
 
     if (companies.length === 0) throw new ExpressError("No companies found", NOT_FOUND);
@@ -32,18 +32,24 @@ router.get("/", async function (req, res, next) {
  * => {company: [companyData]} */
 
 router.post("/", async function (req, res, next) {
+
+  const result = jsonschema.validate(req.body, companyCreateSchema);
+
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(e => e.stack);
+    let error = new ExpressError(listOfErrors, 400);
+    return next(error);
+  }
+
   try {
     let { handle, name, num_employees, description, logo_url } = req.body;
     const company = await Company.create({ handle, name, num_employees, description, logo_url });
-
-    if (!company) throw new ExpressError("Company not created", BAD_REQUEST);
-
-    return res.json({ company })
+    return res.json({ company });
 
   } catch (err) {
-    return next(err);
+    return next (err);
   }
-})
+});
 
 
 /**  GET /companies/:handle
@@ -77,24 +83,30 @@ router.get("/:handle", async function (req, res, next) {
  */
 
 router.patch("/:handle", async function (req, res, next) {
+
+  const result = jsonschema.validate(req.body, companyPatchSchema);
+
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(e => e.stack);
+    let error = new ExpressError(listOfErrors, 400);
+    return next(error);
+  }
+
+  let { handle } = req.params;
+  let { table, items } = req.body;
+  let key = "handle";
+  let id = handle;
+
+  if (handle in items) {
+    throw new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
+  }
+
   try {
-    let { handle } = req.params;
-    let { table, items } = req.body;
-    let key = "handle";
-    let id = handle;
-
-    if (handle in items) {
-      throw new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
-    }
-
     const company = await Company.update({ table, items, key, id });
-
-    if (!company) throw new ExpressError("No company found", NOT_FOUND);
-
-    return res.json({ company })
+    return res.json({ company });
 
   } catch (err) {
-    return next(err);
+    return next (err)
   }
 })
 

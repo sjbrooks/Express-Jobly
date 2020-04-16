@@ -21,8 +21,8 @@ class Company {
         WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)
         AND (num_employees BETWEEN $2 AND $3)`,
       [`%${search.toLowerCase()}%`, min_employees, max_employees]);
-    
-      return result.rows;
+
+    return result.rows;
   }
 
 
@@ -48,10 +48,13 @@ class Company {
       RETURNING handle, name`,
       [handle, name, num_employees, description, logo_url]);
 
+    // QUESTION: If we found an error here, is it possible it could be from a bad request even though we use json schema?
+    if (!result.rows[0]) throw new ExpressError("Company not created", BAD_REQUEST);
+
     return result.rows[0];
   }
-  
-  
+
+
   /**  Company.getByHandle
    * This should return a single company found by its id.
    * 
@@ -66,8 +69,8 @@ class Company {
         FROM companies
         WHERE handle = $1`,
       [handle]);
-    
-      return result.rows[0];
+
+    return result.rows[0];
   }
 
 
@@ -79,14 +82,16 @@ class Company {
    * returns JSON of {company: companyData}
    */
 
-  static async update({table, items, key, id}) {
-    let {query, values} = sqlForPartialUpdate(table, items, key, id);
-    
+  static async update({ table, items, key, id }) {
+    let { query, values } = sqlForPartialUpdate(table, items, key, id);
+
     const result = await db.query(query, values);
+
+    if (!result.rows[0]) throw new ExpressError("No company found", NOT_FOUND);
 
     return result.rows[0];
   }
-  
+
   /**  Company.delete
    * This should remove a single company found by its handle.
    * 
@@ -94,7 +99,7 @@ class Company {
    * 
    * returns JSON of {message: "Company deleted"}
    */
-  
+
   static async delete({ handle }) {
     const result = await db.query(`
       DELETE
@@ -103,9 +108,9 @@ class Company {
       RETURNING handle`,
       [handle]);
 
-      return result.rows[0];
-    }
+    return result.rows[0];
   }
-    
+}
+
 
 module.exports = Company;
