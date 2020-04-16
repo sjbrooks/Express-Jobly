@@ -2,6 +2,8 @@ const db = require("../db")
 const express = require("express")
 const ExpressError = require("../helpers/expressError");
 const sqlForPartialUpdate = require("../helpers/partialUpdate");
+const sqlForSearchQuery = require("../helpers/buildSearchQuery");
+const { NOT_FOUND, BAD_REQUEST, UNAUTHORIZED } = require("../httpStatusCodes");
 
 /** Company model */
 
@@ -13,15 +15,13 @@ class Company {
    * takes {search, min_employees, max_employees}  
    * returns [{companyData}, ...]
    */
-  // TODO: refactor to build up SQL query from what's given, scalability issue.. look @ like for example
-  static async get({ search = '%', min_employees = 0, max_employees = 100000000 }) {
-    const result = await db.query(
-      `SELECT handle, name
-        FROM companies
-        WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)
-        AND (num_employees BETWEEN $2 AND $3)`,
-      [`%${search.toLowerCase()}%`, min_employees, max_employees]);
-      let companies = result.rows
+  
+  static async get({ search, min_employees, max_employees }) {
+    let { query, values } = sqlForSearchQuery(search, min_employees, max_employees);
+
+    const result = await db.query(query, values);
+
+    let companies = result.rows;
     return companies;
   }
 
@@ -47,7 +47,7 @@ class Company {
       )
       RETURNING handle, name`,
       [handle, name, num_employees, description, logo_url]);
-      
+
     let companyData = result.rows[0];
     return companyData;
   }
@@ -108,8 +108,10 @@ class Company {
       RETURNING handle`,
       [handle]);
 
-    let handle = result.rows[0].handle;
-    return handle;
+    let deletedCompany = result.rows[0];
+    if (!deletedCompany) throw new ExpressError("No company found", NOT_FOUND);
+
+    return deletedCompany;
   }
 }
 

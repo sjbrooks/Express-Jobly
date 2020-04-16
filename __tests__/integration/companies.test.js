@@ -191,7 +191,7 @@ describe("Tests for companies routes", function () {
       const resp = await request(app).delete('/companies/TestCo');
       
       expect(resp.statusCode).toBe(200);
-      expect(resp.body).toEqual({"message": "Company deleted"})
+      expect(resp.body).toEqual({"message": "TestCo deleted"})
     });
   
     it("Cannot delete non-existant company", async function(){

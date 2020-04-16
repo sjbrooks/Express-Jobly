@@ -6,73 +6,60 @@
  * 
  */
 
- function sqlForSearchQuery(search, min_employees, max_employees){
-    let query = 'SELECT handle, name FROM companies'; 
-    let values = [];
-    let addQuery = ' WHERE ';
+function sqlForSearchQuery(search, min_employees, max_employees) {
+  let query = 'SELECT handle, name FROM companies';
+  let values = [];
+  let addQuery = ' WHERE ';
 
-    if (!search && !min_employees && !max_employees){
-        return query;
-    }
-
-    if(search){
-    addQuery.concat('(lower(name) LIKE $1 OR lower(handle) LIKE $1)')
-    }
-
-num_employees BETWEEN
-
-    // if(search && !min_employees && !max_employees){
-    //     addQuery = ` WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)`
-    //     values.push(search);
-    //     query = query.concat(addQuery);
-    //     return {query, values};
-    //  }
-
-    //  if(search && min_employees && !max_employees){
-    //     let addQuery = `WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)`
-    //     values.push(search);
-    //     query = query.concat(addQuery);
-    //     return {query, values};
-    //  }
-
-
-
-
-
-
-  let idx = 1;
-  let columns = [];
-  let columnNames = [];  // added
-
-  // filter out keys that start with "_" -- we don't want these in DB
-  for (let key in items) {
-    if (key.startsWith("_")) {
-      delete items[key];
-    }
+  if (!search && !min_employees && !max_employees) {
+    return { query, values };
   }
 
-  for (let column in items) {
-    columns.push(`${column}=$${idx}`);
-    columnNames.push(column);  // added
-    idx += 1;
+  if (search) {
+    addQuery += ('(lower(name) LIKE $1 OR lower(handle) LIKE $1)');
+    console.log("\n\n\n\n addQuery inside of if(search) inside buildSerachQuery BEFORE nested if block is ", addQuery);
+
+    values.push(`%${search.toLowerCase()}%`);
+
+    if (min_employees || max_employees) {
+      min_employees = min_employees || 0;
+      max_employees = max_employees || 100000000;
+
+      addQuery += (' AND (num_employees BETWEEN $2 AND $3)');
+      query += addQuery;
+      values.push(min_employees, max_employees);
+      return { query, values }
+    }
+
+    console.log("\n\n\n\n addQuery inside of if(search) inside buildSerachQuery is ", addQuery);
+    query += (addQuery);
+    return { query, values }
   }
 
-  columnNames.push(key);
+  if (min_employees || max_employees) {
+    min_employees = min_employees || 0;
+    max_employees = max_employees || 100000000;
 
-// example of columns ['username=$1', 'handle=$2', 'id=$3', 'phone=$3']
-  // build query
-  let cols = columns.join(", ");
-  let colNames = columnNames.join(", ");  // added
-
-  // cols looks like "username=$1, handle=$2, id=$3, phone=$3"
-  let query = `UPDATE ${table} SET ${cols} WHERE ${key}=$${idx} RETURNING ${colNames}`; // changed from * to ${columnNames}, wanted to return JUST what was changed, not everything for security concerns
-
-  let values = Object.values(items);
-  values.push(id);
-
-  // only creates query, doesn't send it
-  // we should use this in the models?
-  return { query, values };
+    addQuery += (' (num_employees BETWEEN $1 AND $2)');
+    query += (addQuery);
+    values.push(min_employees, max_employees);
+    return { query, values }
+  }
 }
+
+  // if(search && !min_employees && !max_employees){
+  //     addQuery = ` WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)`
+  //     values.push(search);
+  //     query = query.concat(addQuery);
+  //     return {query, values};
+  //  }
+
+  //  if(search && min_employees && !max_employees){
+  //     let addQuery = `WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)`
+  //     values.push(search);
+  //     query = query.concat(addQuery);
+  //     return {query, values};
+  //  }
+
 
 module.exports = sqlForSearchQuery;
