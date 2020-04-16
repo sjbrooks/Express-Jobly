@@ -11,9 +11,9 @@ class Company {
    * Get all companies that meet the query parameters passed in
    * 
    * takes {search, min_employees, max_employees}  
-   * returns JSON of {companies: [companyData, ...]}
+   * returns [{companyData}, ...]
    */
-
+  // TODO: refactor to build up SQL query from what's given, scalability issue.. look @ like for example
   static async get({ search = '%', min_employees = 0, max_employees = 100000000 }) {
     const result = await db.query(
       `SELECT handle, name
@@ -21,8 +21,8 @@ class Company {
         WHERE (lower(name) LIKE $1 OR lower(handle) LIKE $1)
         AND (num_employees BETWEEN $2 AND $3)`,
       [`%${search.toLowerCase()}%`, min_employees, max_employees]);
-
-    return result.rows;
+      let companies = result.rows
+    return companies;
   }
 
 
@@ -31,7 +31,7 @@ class Company {
    * and return the newly created company.
    * 
    * takes { handle, name, num_employees, description, logo_url } 
-   * returns JOSN of {company: [companyData]}
+   * returns {companyData}
    */
 
   static async create({ handle, name, num_employees, description, logo_url }) {
@@ -47,11 +47,9 @@ class Company {
       )
       RETURNING handle, name`,
       [handle, name, num_employees, description, logo_url]);
-
-    // QUESTION: If we found an error here, is it possible it could be from a bad request even though we use json schema?
-    if (!result.rows[0]) throw new ExpressError("Company not created", BAD_REQUEST);
-
-    return result.rows[0];
+      
+    let companyData = result.rows[0];
+    return companyData;
   }
 
 
@@ -60,7 +58,7 @@ class Company {
    * 
    * takes {handle}
    * 
-   * returns JSON of {company: companyData}
+   * returns {companyData}
    */
 
   static async getByHandle({ handle }) {
@@ -70,26 +68,28 @@ class Company {
         WHERE handle = $1`,
       [handle]);
 
-    return result.rows[0];
+    let companyData = result.rows[0];
+    return companyData;
   }
 
 
   /**  Company.update
    * This should update an existing company and return the updated company.
    * 
-   * takes (table, items, key, id)
+   * takes {table, items, key, id}
    * 
-   * returns JSON of {company: companyData}
+   * returns {companyData}
    */
 
   static async update({ table, items, key, id }) {
     let { query, values } = sqlForPartialUpdate(table, items, key, id);
 
     const result = await db.query(query, values);
-
+    // const companyData = result.rows[0] can make the following 2 lines more readable
     if (!result.rows[0]) throw new ExpressError("No company found", NOT_FOUND);
 
-    return result.rows[0];
+    let companyData = result.rows[0];
+    return companyData;
   }
 
   /**  Company.delete
@@ -97,7 +97,7 @@ class Company {
    * 
    * takes {handle}
    * 
-   * returns JSON of {message: "Company deleted"}
+   * returns handle
    */
 
   static async delete({ handle }) {
@@ -108,7 +108,8 @@ class Company {
       RETURNING handle`,
       [handle]);
 
-    return result.rows[0];
+    let handle = result.rows[0].handle;
+    return handle;
   }
 }
 

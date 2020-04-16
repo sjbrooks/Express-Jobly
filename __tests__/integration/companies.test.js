@@ -31,10 +31,10 @@ describe("Tests for companies routes", function () {
 
       expect(resp.statusCode).toBe(200);
       expect(resp.body).toEqual({
-        "companies": [
+        companies: [
           {
-            "handle": "TestCo",
-            "name": "Test Company"
+            handle: "TestCo",
+            name: "Test Company"
           }
         ]
       });
@@ -45,8 +45,8 @@ describe("Tests for companies routes", function () {
 
       expect(resp.body.status).toBe(404);
       expect(resp.body).toEqual({
-        "status": 404,
-        "message": "No companies found"
+        status: 404,
+        message: "No companies found"
       });
     });
   });
@@ -57,10 +57,10 @@ describe("Tests for companies routes", function () {
 
       expect(resp.statusCode).toBe(200);
       expect(resp.body).toEqual({
-        "company":
+        company:
         {
-          "handle": "TestCo",
-          "name": "Test Company"
+          handle: "TestCo",
+          name: "Test Company"
         }
       });
     });
@@ -70,8 +70,8 @@ describe("Tests for companies routes", function () {
 
       expect(resp.statusCode).toBe(404);
       expect(resp.body).toEqual({
-        "status": 404,
-        "message": "No company found"
+        status: 404,
+        message: "No company found"
       });
     });
   });
@@ -82,19 +82,18 @@ describe("Tests for companies routes", function () {
 
       const resp = await request(app).post('/companies').send(
         {
-          "handle": "testing",
-          "name": "testname",
-          "num_employees": 1200000,
-          "description": "nefarious and despicable environmental damage",
-          "logo_url": "http://not-a-real-logo.edu"
+          handle: "testing",
+          name: "testname",
+          num_employees: 1200000,
+          description: "nefarious and despicable environmental damage",
+          logo_url: "http://not-a-real-logo.edu"
         }
       );
-      // QUESTION: how do we send a 201 status code?
       expect(resp.statusCode).toBe(201);
       expect(resp.body).toEqual({
-        "company": {
-          "handle": "testing",
-          "name": "testname"
+        company: {
+          handle: "testing",
+          name: "testname"
         }
       });
 
@@ -102,9 +101,9 @@ describe("Tests for companies routes", function () {
       const companies = await request(app).get('/companies');
 
       expect(companies.body).toEqual({
-        "companies": [{
-          "handle": "testing",
-          "name": "testname"
+        companies: [{
+          handle: "testing",
+          name: "testname"
         }]
       });
 
@@ -113,33 +112,33 @@ describe("Tests for companies routes", function () {
     it("Cannot create new company because new handle already exists in db", async function () {
       const resp = await request(app).post('/companies').send(
         {
-          "handle": "TestCo",
-          "name": "testname",
-          "num_employees": 1200000,
-          "description": "nefarious and despicable environmental damage",
-          "logo_url": "http://not-a-real-logo.edu"
+          handle: "TestCo",
+          name: "testname",
+          num_employees: 1200000,
+          description: "nefarious and despicable environmental damage",
+          logo_url: "http://not-a-real-logo.edu"
         }
       );
 
       expect(resp.body).toEqual({
-        "message": "duplicate key value violates unique constraint \"companies_pkey\""
+        message: "duplicate key value violates unique constraint \"companies_pkey\""
       });
     });
 
     it("Cannot create new company because num_employees not of right data type", async function () {
       const resp = await request(app).post('/companies').send(
         {
-          "handle": "anon",
-          "name": "testname",
-          "num_employees": "catscatscats",
-          "description": "nefarious and despicable environmental damage",
-          "logo_url": "http://not-a-real-logo.edu"
+          handle: "anon",
+          name: "testname",
+          num_employees: "catscatscats",
+          description: "nefarious and despicable environmental damage",
+          logo_url: "http://not-a-real-logo.edu"
         }
       );
 
       expect(resp.body).toEqual({
-        "status": 400,
-        "message": [
+        status: 400,
+        message: [
           "instance.num_employees is not of a type(s) integer"
         ]
       });

@@ -32,21 +32,20 @@ router.get("/", async function (req, res, next) {
  * => {company: [companyData]} */
 
 router.post("/", async function (req, res, next) {
-
-  const result = jsonschema.validate(req.body, companyCreateSchema);
-
-  if (!result.valid) {
-    let listOfErrors = result.errors.map(e => e.stack);
-    let error = new ExpressError(listOfErrors, 400);
-    return next(error);
-  }
-
   try {
+    const result = jsonschema.validate(req.body, companyCreateSchema);
+
+    if (!result.valid) {
+      let listOfErrors = result.errors.map(e => e.stack);
+      throw new ExpressError(listOfErrors, 400);
+    }
+
     let { handle, name, num_employees, description, logo_url } = req.body;
     const company = await Company.create({ handle, name, num_employees, description, logo_url });
-    return res.status(201).json({company});
+    if (!company) throw new ExpressError("Company not created", BAD_REQUEST);
+    return res.status(201).json({ company });
   } catch (err) {
-    return next (err);
+    return next(err);
   }
 });
 
@@ -62,9 +61,9 @@ router.get("/:handle", async function (req, res, next) {
   try {
     let { handle } = req.params;
     const company = await Company.getByHandle({ handle });
-  
+
     if (!company) throw new ExpressError("No company found", NOT_FOUND);
-    
+
     return res.json({ company })
 
   } catch (err) {
@@ -82,31 +81,29 @@ router.get("/:handle", async function (req, res, next) {
  */
 
 router.patch("/:handle", async function (req, res, next) {
-
-  const result = jsonschema.validate(req.body, companyPatchSchema);
-
-  if (!result.valid) {
-    let listOfErrors = result.errors.map(e => e.stack);
-    let error = new ExpressError(listOfErrors, 400);
-    return next(error);
-  }
-
-  let { handle } = req.params;
-  let { table, items } = req.body;
-  let key = "handle";
-  let id = handle;
-
-  if ("handle" in items) {
-    let error = new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
-    return next(error);
-  }
-
   try {
+    const result = jsonschema.validate(req.body, companyPatchSchema);
+
+    if (!result.valid) {
+      let listOfErrors = result.errors.map(e => e.stack);
+      throw new ExpressError(listOfErrors, 400);
+    }
+
+    let { handle } = req.params;
+    let { table, items } = req.body;
+    let key = "handle";
+    let id = handle;
+
+    if ("handle" in items) {
+      throw new ExpressError("Cannot change primary key 'handle' in request body", BAD_REQUEST)
+    }
+
+
     const company = await Company.update({ table, items, key, id });
     return res.json({ company });
 
   } catch (err) {
-    return next (err)
+    return next(err)
   }
 })
 
@@ -126,7 +123,7 @@ router.delete("/:handle", async function (req, res, next) {
     const company = await Company.delete({ handle });
 
     if (!company) throw new ExpressError("No company found", NOT_FOUND);
-    return res.json({ message: "Company deleted" });
+    return res.json({ message: `${handle} deleted` });
 
   } catch (err) {
     return next(err);
