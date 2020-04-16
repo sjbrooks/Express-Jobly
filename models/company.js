@@ -81,23 +81,12 @@ class Company {
 
   static async update({table, items, key, id}) {
     let {query, values} = sqlForPartialUpdate(table, items, key, id);
-
-    // let fullQuery = sqlForPartialUpdate(table, items, key, id);
-    // console.log('\n\n\n\n THE FULL QUERY INSIDE UPDATE VERSION 3 IS ', fullQuery.query, fullQuery.values);
-    // console.log('\n\n\n\n THE FULL QUERY INSIDE UPDATE VERSION 1 IS ', `${fullQuery.query}, `, `[${fullQuery.values}]`)
-    // console.log('\n\n\n\n THE FULL QUERY INSIDE UPDATE VERSION 2 IS ', `${fullQuery.query}, `, fullQuery.values)
-    // console.log('\n\n\n\n THE FULL QUERY INSIDE UPDATE VERSION 3 IS ', ```${fullQuery.query}``, `, fullQuery.values)
-    // console.log('\n\n\n\n THE SQL QUERY IS ', fullQuery.query)
-    // console.log('\n\n\n\n THE SQL PARAMATERS ARE ', fullQuery.values)
     
     const result = await db.query(query, values);
 
-    console.log('\n\n\n\n THE RESULT INSIDE UPDATE QUERY IS ', result)
-
     return result.rows[0];
   }
-}
-
+  
   /**  Company.delete
    * This should remove a single company found by its handle.
    * 
@@ -105,16 +94,18 @@ class Company {
    * 
    * returns JSON of {message: "Company deleted"}
    */
+  
+  static async delete({ handle }) {
+    const result = await db.query(`
+      DELETE
+      FROM companies
+      WHERE handle = $1
+      RETURNING handle`,
+      [handle]);
 
-  // static async getByHandle({ handle }) {
-  //   const result = await db.query(
-  //     `SELECT handle, name
-  //       FROM companies
-  //       WHERE handle = $1`,
-  //     [handle]);
+      return result.rows[0];
+    }
+  }
     
-  //     return result.rows[0];
-  // }
-
 
 module.exports = Company;
