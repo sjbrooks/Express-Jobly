@@ -70,7 +70,7 @@ describe("Tests for companies routes", function () {
 
       // QUESTION how do we easily determine which error status code vs expressError code?
       // expressError turns up in resp.body, not resp.statusCode
-      expect(resp.body.status).toBe(404);
+      expect(resp.statusCode).toBe(404);
       expect(resp.body).toEqual({
         "status": 404,
         "message": "No company found"
@@ -190,8 +190,23 @@ describe("Tests for companies routes", function () {
   });
 
   describe("DELETE /companies", function() {
-    
-  })
+    it("Successfully deletes a company in db", async function(){
+      const resp = await request(app).delete('/companies/TestCo');
+      
+      expect(resp.statusCode).toBe(200);
+      expect(resp.body).toEqual({"message": "Company deleted"})
+    });
+  
+    it("Cannot delete non-existant company", async function(){
+      const resp = await request(app).delete('/companies/ImaginaryLTD');
+      
+      expect(resp.statusCode).toBe(404);
+      expect(resp.body).toEqual({
+        "status": 404,
+        "message": "No company found"
+      })
+    });
+  });
 
 
 
