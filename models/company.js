@@ -5,6 +5,7 @@ const sqlForPartialUpdate = require("../helpers/partialUpdate");
 const sqlForSearchQuery = require("../helpers/buildSearchQuery");
 const { NOT_FOUND, BAD_REQUEST, UNAUTHORIZED } = require("../httpStatusCodes");
 
+
 /** Company model */
 
 class Company {
@@ -15,7 +16,7 @@ class Company {
    * takes {search, min_employees, max_employees}  
    * returns [{companyData}, ...]
    */
-  
+
   static async get({ search, min_employees, max_employees }) {
     let { query, values } = sqlForSearchQuery(search, min_employees, max_employees);
 
@@ -69,6 +70,17 @@ class Company {
       [handle]);
 
     let companyData = result.rows[0];
+
+
+    const jobsQuery = await db.query(
+      `SELECT title, date_posted
+          FROM jobs
+          WHERE company_handle = $1`,
+      [handle]
+    )
+    const companyJobs = jobsQuery.rows;
+    companyData.jobs = companyJobs
+
     return companyData;
   }
 

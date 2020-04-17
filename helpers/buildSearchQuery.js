@@ -6,12 +6,12 @@
  * 
  */
 
-function sqlForSearchQuery(search, min_employees, max_employees) {
+function sqlForSearchQuery(search, min_value, max_value) {
   let query = 'SELECT handle, name FROM companies';
   let values = [];
   let addQuery = ' WHERE ';
 
-  if (!search && !min_employees && !max_employees) {
+  if (!search && !min_value && !max_value) {
     return { query, values };
   }
 
@@ -21,13 +21,13 @@ function sqlForSearchQuery(search, min_employees, max_employees) {
 
     values.push(`%${search.toLowerCase()}%`);
 
-    if (min_employees || max_employees) {
-      min_employees = min_employees || 0;
-      max_employees = max_employees || 100000000;
+    if (min_value || max_value) {
+      min_value = min_value || 0;
+      max_value = max_value || 100000000;
 
       addQuery += (' AND (num_employees BETWEEN $2 AND $3)');
       query += addQuery;
-      values.push(min_employees, max_employees);
+      values.push(min_value, max_value);
       return { query, values }
     }
 
@@ -36,13 +36,13 @@ function sqlForSearchQuery(search, min_employees, max_employees) {
     return { query, values }
   }
 
-  if (min_employees || max_employees) {
-    min_employees = min_employees || 0;
-    max_employees = max_employees || 100000000;
+  if (min_value || max_value) {
+    min_value = min_value || 0;
+    max_value = max_value || 100000000;
 
     addQuery += (' (num_employees BETWEEN $1 AND $2)');
     query += (addQuery);
-    values.push(min_employees, max_employees);
+    values.push(min_value, max_value);
     return { query, values }
   }
 }

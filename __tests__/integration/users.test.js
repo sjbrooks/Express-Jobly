@@ -5,7 +5,7 @@ const request = require("supertest");
 const app = require("../../app");
 const db = require("../../db");
 
-const Company = require("../../models/user");
+const Company = require("../../models/job");
 
 
 

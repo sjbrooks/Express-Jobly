@@ -17,3 +17,14 @@ CREATE TABLE jobs
     date_posted DATE,
     CHECK (equity<1)
 );
+
+
+CREATE TABLE users(
+    username TEXT PRIMARY KEY,
+    password TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    photo_url TEXT,
+    is_admin BOOLEAN NOT NULL default FALSE
+);
